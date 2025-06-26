@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인터랙티브 인포그래픽: 전동킥보드 산재 판결 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Brilliant Blues -->
+    <!-- Application Structure Plan: The SPA is structured as a narrative journey, divided into four main sections: 1) Incident Timeline, 2) Core Conflict, 3) Court's Analysis, and 4) Final Verdict. This storytelling approach was chosen over a dashboard layout because it is more intuitive for a general audience to follow the progression of a legal case. The key interaction is the clickable card system in the 'Court's Analysis' section, which breaks down complex legal reasoning into digestible, user-controlled segments. This structure guides the user from the basic facts to the detailed legal logic and final conclusion, enhancing comprehension and engagement. -->
+    <!-- Visualization & Content Choices: 
+        1. Incident Timeline: Goal: Change/Organize. Method: A timeline built with HTML/CSS and Unicode icons (e.g., 📅, 🛴, 🏥, ⚖️). It visually presents the sequence of events. Justification: A linear timeline is the most effective way to communicate a chronological story. NO SVG/Mermaid.
+        2. Conflict Comparison: Goal: Compare. Method: Side-by-side text cards with opposing viewpoints and a simple Chart.js Donut Chart. The chart visualizes the "1 vs 1" conflict. Justification: Clearly frames the central dispute of the case before delving into the court's reasoning. Library: Chart.js.
+        3. Court's Reasoning: Goal: Organize/Inform. Method: Interactive HTML/CSS/JS cards. Each card represents a key point of the court's judgment. Clicking a card reveals a detailed explanation. Justification: Prevents information overload by allowing users to explore complex legal arguments at their own pace. Method: Vanilla JS. NO SVG/Mermaid.
+        4. Verdict Summary: Goal: Inform. Method: A large, highlighted HTML text block. Justification: Provides a clear and impactful summary of the case's final outcome and its significance. NO SVG/Mermaid.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; /* slate-50 */ }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        .card:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .nav-link { transition: color 0.3s, border-color 0.3s; color: #475569; /* slate-600 */ border-bottom: 2px solid transparent; }
+        .nav-link.active { color: #2563eb; /* blue-600 */ border-bottom-color: #2563eb; font-weight: 700; }
+        html { scroll-behavior: smooth; }
+        .timeline-item::before { content: ''; position: absolute; left: 11px; top: 12px; bottom: -12px; width: 2px; background-color: #93c5fd; /* blue-300 */ }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-icon { z-index: 1; }
+        .judgment-card { cursor: pointer; }
+        .judgment-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out; }
+        .judgment-content.show { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem;}
+        .chart-container { position: relative; width: 100%; max-width: 300px; margin: 1rem auto; height: 300px; max-height: 300px; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold text-blue-600">전동킥보드 산재 판결 분석</h1>
+                <nav class="hidden md:flex items-center space-x-8 text-sm">
+                    <a href="#section-1" class="nav-link">사건 개요</a>
+                    <a href="#section-2" class="nav-link">핵심 쟁점</a>
+                    <a href="#section-3" class="nav-link">법원의 판단</a>
+                    <a href="#section-4" class="nav-link">최종 결론</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 md:p-8">
+
+        <section id="section-1" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4">하나의 사고, 두 개의 시선</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 이야기는 한 전기 기술자의 평범했던 퇴근길에서 시작됩니다. 전동킥보드 사고가 어떻게 법적 다툼으로 이어졌고, 법원은 어떤 결론을 내렸는지 시간 순서에 따라 알아보겠습니다.</p>
+            <div class="card p-6 md:p-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="relative">
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">📅</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2023년 8월 15일: 사고 발생</h3>
+                                    <p class="text-slate-600 mt-1">건설현장 전기공 A씨, 퇴근길에 전동킥보드를 운전하던 중 적색 신호에 횡단보도를 건너다 승용차와 충돌하여 무릎에 큰 부상을 입었습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">🛴</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2023년 10월 6일: 요양급여 신청</h3>
+                                    <p class="text-slate-600 mt-1">A씨는 이 사고가 업무와 관련된 '출퇴근 재해'라며, 치료비 지원을 위해 근로복지공단에 요양급여를 신청했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">🚫</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2024년 1월 12일: 공단의 불승인 처분</h3>
+                                    <p class="text-slate-600 mt-1">공단은 "사고의 원인이 A씨의 중대한 법규 위반(신호 위반)이라는 '범죄행위'에 있으므로 업무상 재해로 볼 수 없다"며 신청을 거절했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">⚖️</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">이후: 법원의 문을 두드리다</h3>
+                                    <p class="text-slate-600 mt-1">A씨는 공단의 결정에 불복하고, 이 처분을 취소해달라며 서울행정법원에 소송을 제기했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-2" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4">핵심 쟁점: '범죄행위'의 경계</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 사건의 가장 큰 다툼은 A씨의 '신호 위반'이 산재보험 적용을 배제할 정도의 '범죄행위'에 해당하는지 여부였습니다. 양측의 팽팽한 주장을 확인해보세요.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6 md:p-8 text-center">
+                    <h3 class="text-xl font-bold text-red-600 mb-2">근로복지공단의 주장</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-4">"명백한 법규 위반은 개인의 책임"</p>
+                    <p class="text-slate-600">신호 위반은 스스로 위험을 자초한 중과실 행위이자 교통사고처리특례법을 위반한 범죄행위입니다. 이는 산재보험법이 보호하지 않는 예외 사유에 해당합니다.</p>
+                </div>
+                <div class="card p-6 md:p-8 text-center">
+                    <h3 class="text-xl font-bold text-green-600 mb-2">A씨(원고)의 주장</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-4">"출퇴근 중 발생한 통상적 사고"</p>
+                    <p class="text-slate-600">교통법규를 위반했지만, 이것이 고의적 자해나 중대 범죄와 동일시될 수는 없습니다. 퇴근 과정에서 발생한 사고이므로 업무상 재해로 인정해야 합니다.</p>
+                </div>
+            </div>
+             <div class="card p-6 mt-8">
+                 <h3 class="text-xl font-bold text-center text-slate-800 mb-4">쟁점 시각화</h3>
+                 <p class="text-center text-slate-600 mb-4">이 사건은 결국 하나의 질문으로 모아집니다. 'A씨의 행동을 어디까지 개인의 잘못으로 볼 것인가?'</p>
+                 <div class="chart-container">
+                    <canvas id="disputeChart"></canvas>
+                 </div>
+             </div>
+        </section>
+
+        <section id="section-3" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4">법원의 판단: 근로자의 편에 서다</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">법원은 여러 사정을 종합하여 A씨의 손을 들어주었습니다. 판결의 논리를 뒷받침한 핵심적인 이유들을 아래 카드에서 클릭하여 자세히 살펴보세요.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="judgment-card card p-6" data-key="1">
+                    <h3 class="font-bold text-lg text-blue-700">1. '범죄행위'의 엄격한 해석</h3>
+                    <p class="text-slate-500 mt-1">단순 교통법규 위반은 '그것'이 아니다.</p>
+                    <div class="judgment-content text-slate-600">산재보험법에서 말하는 '범죄행위'는 보험 제도의 근간을 흔들 만큼 위법성이 매우 큰 경우를 의미합니다. 법원은 모든 교통법규 위반을 여기에 해당한다고 볼 수는 없다고 선을 그었습니다.</div>
+                </div>
+                <div class="judgment-card card p-6" data-key="2">
+                    <h3 class="font-bold text-lg text-blue-700">2. 업무상 피로와 순간의 실수</h3>
+                    <p class="text-slate-500 mt-1">고의가 아닌 판단 착오의 가능성.</p>
+                    <div class="judgment-content text-slate-600">A씨는 일용직으로 하루 종일 근무하여 육체적·정신적 피로도가 상당했을 것입니다. 법원은 이를 고려할 때, A씨의 신호위반이 고의나 중대한 부주의라기보다는 순간적인 집중력 저하나 판단 착오였을 가능성이 있다고 보았습니다.</div>
+                </div>
+                <div class="judgment-card card p-6" data-key="3">
+                    <h3 class="font-bold text-lg text-blue-700">3. 사회적·제도적 배경</h3>
+                    <p class="text-slate-500 mt-1">미비했던 전동킥보드 관련 규제.</p>
+                    <div class="judgment-content text-slate-600">사고 당시, 전동킥보드 이용자는 급증했지만 관련 법규나 안전 교육은 미비한 상태였습니다. 이러한 사회적 배경 속에서 A씨의 행위가 산재보험 보호에서 배제될 만큼 비난 가능성이 크다고 보기는 어렵다고 판단했습니다.</div>
+                </div>
+                <div class="judgment-card card p-6" data-key="4">
+                    <h3 class="font-bold text-lg text-blue-700">4. 통상 수반되는 위험의 범위</h3>
+                    <p class="text-slate-500 mt-1">출퇴근길에 일어날 수 있는 사고.</p>
+                    <div class="judgment-content text-slate-600">법원은 A씨의 사고가 출퇴근 과정에서 통상적으로 발생할 수 있는 위험의 범위를 벗어났다고 보기 어렵다고 판단했습니다. 즉, 특별히 이례적인 사고가 아니라는 의미입니다.</div>
+                </div>
+                <div class="judgment-card card p-6" data-key="5">
+                    <h3 class="font-bold text-lg text-blue-700">5. 입증 책임의 원칙</h3>
+                    <p class="text-slate-500 mt-1">'범죄행위'임은 공단이 증명해야.</p>
+                    <div class="judgment-content text-slate-600">A씨의 행위가 예외적인 '범죄행위'에 해당한다는 사실은 혜택을 주지 않으려는 근로복지공단 측에서 증명해야 합니다. 법원은 공단이 이를 충분히 증명하지 못했다고 보았습니다.</div>
+                </div>
+                <div class="judgment-card card p-6" data-key="6">
+                    <h3 class="font-bold text-lg text-blue-700">6. 산재보험의 취지</h3>
+                    <p class="text-slate-500 mt-1">근로자 보호라는 대원칙.</p>
+                    <div class="judgment-content text-slate-600">산재보험은 업무상 재해를 입은 근로자와 그 가족의 생활을 보장하는 것을 목적으로 합니다. 근로자의 사소한 과실을 이유로 보호 범위를 지나치게 좁게 해석하는 것은 제도의 본질에 어긋난다고 보았습니다.</div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section-4">
+             <h2 class="text-3xl font-bold text-center mb-4">최종 결론: 상식과 원칙의 승리</h2>
+             <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">모든 과정을 검토한 법원은 근로복지공단의 처분이 위법하다고 최종 판결했습니다.</p>
+            <div class="card p-8 md:p-12 text-center bg-blue-600 text-white">
+                 <span class="text-5xl" role="img" aria-label="gavel">⚖️</span>
+                <h3 class="text-2xl md:text-3xl font-bold mt-4 mb-6">"피고가 원고에 대하여 한 최초요양 불승인처분을 취소한다."</h3>
+                <p class="max-w-4xl mx-auto">이 판결은 근로자의 과실이 사고 발생에 일부 기여했더라도, 그것이 고의적이거나 사회 통념상 용납하기 어려운 수준의 중대 범죄가 아닌 한, 산재보험의 보호 울타리 안에서 폭넓게 보호해야 한다는 원칙을 재확인한 의미 있는 사례입니다. 소송비용 또한 근로복지공단이 부담하게 되었습니다.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center p-8 mt-8 text-sm text-slate-500">
+        <p>&copy; 2025 Interactive Case Analysis. All rights reserved.</p>
+        <p class="mt-1">본 콘텐츠는 서울행정법원 2024구단75935 판결문을 기반으로 정보 제공 목적으로 제작되었습니다.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const disputeCtx = document.getElementById('disputeChart');
+            if (disputeCtx) {
+                new Chart(disputeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['공단 주장 (산재 아님)', 'A씨 주장 (산재 맞음)'],
+                        datasets: [{
+                            data: [50, 50],
+                            backgroundColor: ['#ef4444', '#22c55e'],
+                            borderColor: '#f8fafc',
+                            borderWidth: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let label = tooltipItems[0].label;
+                                        if(Array.isArray(label)){ return label.join(' '); }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            document.querySelectorAll('.judgment-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const content = card.querySelector('.judgment-content');
+                    const isShown = content.classList.contains('show');
+                    
+                    document.querySelectorAll('.judgment-content.show').forEach(openContent => {
+                        if(openContent !== content) openContent.classList.remove('show');
+                    });
+
+                    if(isShown) {
+                        content.classList.remove('show');
+                    } else {
+                        content.classList.add('show');
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            const linkHref = link.getAttribute('href');
+                            link.classList.toggle('active', linkHref === `#${entry.target.id}`);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+</body>
+</html>
