@@ -1,246 +1,417 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인터랙티브 인포그래픽: 전동킥보드 산재 판결 분석</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Brilliant Blues -->
-    <!-- Application Structure Plan: The SPA is structured as a narrative journey, divided into four main sections: 1) Incident Timeline, 2) Core Conflict, 3) Court's Analysis, and 4) Final Verdict. This storytelling approach was chosen over a dashboard layout because it is more intuitive for a general audience to follow the progression of a legal case. The key interaction is the clickable card system in the 'Court's Analysis' section, which breaks down complex legal reasoning into digestible, user-controlled segments. This structure guides the user from the basic facts to the detailed legal logic and final conclusion, enhancing comprehension and engagement. -->
-    <!-- Visualization & Content Choices: 
-        1. Incident Timeline: Goal: Change/Organize. Method: A timeline built with HTML/CSS and Unicode icons (e.g., 📅, 🛴, 🏥, ⚖️). It visually presents the sequence of events. Justification: A linear timeline is the most effective way to communicate a chronological story. NO SVG/Mermaid.
-        2. Conflict Comparison: Goal: Compare. Method: Side-by-side text cards with opposing viewpoints and a simple Chart.js Donut Chart. The chart visualizes the "1 vs 1" conflict. Justification: Clearly frames the central dispute of the case before delving into the court's reasoning. Library: Chart.js.
-        3. Court's Reasoning: Goal: Organize/Inform. Method: Interactive HTML/CSS/JS cards. Each card represents a key point of the court's judgment. Clicking a card reveals a detailed explanation. Justification: Prevents information overload by allowing users to explore complex legal arguments at their own pace. Method: Vanilla JS. NO SVG/Mermaid.
-        4. Verdict Summary: Goal: Inform. Method: A large, highlighted HTML text block. Justification: Provides a clear and impactful summary of the case's final outcome and its significance. NO SVG/Mermaid.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; /* slate-50 */ }
-        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
-        .card:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
-        .nav-link { transition: color 0.3s, border-color 0.3s; color: #475569; /* slate-600 */ border-bottom: 2px solid transparent; }
-        .nav-link.active { color: #2563eb; /* blue-600 */ border-bottom-color: #2563eb; font-weight: 700; }
-        html { scroll-behavior: smooth; }
-        .timeline-item::before { content: ''; position: absolute; left: 11px; top: 12px; bottom: -12px; width: 2px; background-color: #93c5fd; /* blue-300 */ }
-        .timeline-item:last-child::before { display: none; }
-        .timeline-icon { z-index: 1; }
-        .judgment-card { cursor: pointer; }
-        .judgment-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out; }
-        .judgment-content.show { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem;}
-        .chart-container { position: relative; width: 100%; max-width: 300px; margin: 1rem auto; height: 300px; max-height: 300px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>노무사 판례 가이드</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Noto Sans KR 폰트 로드 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f0f4f8; /* 은은한 배경색 */
+      color: #2d3748; /* 기본 텍스트 색상 */
+      line-height: 1.6;
+    }
+    .header-bg {
+      background: linear-gradient(135deg, #4a90e2, #63b3ed); /* 헤더 그라데이션 */
+    }
+    .list-card { /* 리스트 형식에 맞게 카드 스타일 조정 */
+      background-color: white;
+      border-radius: 0.75rem; /* 기존 카드보다 살짝 덜 둥글게 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); /* 부드러운 그림자 */
+      padding: 1.5rem 2rem; /* 패딩 조정 */
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    /* 링크가 있는 카드에만 호버 효과 및 커서 적용 */
+    .list-card.interactive:hover {
+      transform: translateY(-3px); /* 호버 시 살짝 떠오르는 효과 */
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      cursor: pointer; /* 클릭 가능한 요소임을 나타냄 */
+    }
+    .btn-primary {
+      background-color: #4a90e2;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s ease-in-out;
+      text-align: center;
+      display: inline-block;
+    }
+    .btn-primary:hover {
+      background-color: #357bd8;
+    }
+    .section-title {
+      color: #2a69ac; /* 섹션 제목 색상 */
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background-color: #4a90e2; /* 강조선 */
+      border-radius: 2px;
+    }
+    /* 애니메이션 키프레임 */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fade-in-down { animation: fadeInDown 0.8s ease-out forwards; }
+    .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    /* 리스트 아이템별 지연 애니메이션 */
+    .list-item-animation { opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
+    .list-item-animation:nth-child(1) { animation-delay: 0.1s; }
+    .list-item-animation:nth-child(2) { animation-delay: 0.15s; }
+    .list-item-animation:nth-child(3) { animation-delay: 0.2s; }
+    .list-item-animation:nth-child(4) { animation-delay: 0.25s; }
+    .list-item-animation:nth-child(5) { animation-delay: 0.3s; }
+    .list-item-animation:nth-child(6) { animation-delay: 0.35s; }
+    .list-item-animation:nth-child(7) { animation-delay: 0.4s; }
+    .list-item-animation:nth-child(8) { animation-delay: 0.45s; }
+    .list-item-animation:nth-child(9) { animation-delay: 0.5s; }
+    .list-item-animation:nth-child(10) { animation-delay: 0.55s; }
+    .list-item-animation:nth-child(11) { animation-delay: 0.6s; }
+    .list-item-animation:nth-child(12) { animation-delay: 0.65s; }
+    .list-item-animation:nth-child(13) { animation-delay: 0.7s; }
+    .list-item-animation:nth-child(14) { animation-delay: 0.75s; }
+    .list-item-animation:nth-child(15) { animation-delay: 0.8s; }
+    .list-item-animation:nth-child(16) { animation-delay: 0.85s; }
+    .list-item-animation:nth-child(17) { animation-delay: 0.9s; }
+    .list-item-animation:nth-child(18) { animation-delay: 0.95s; }
+    .list-item-animation:nth-child(19) { animation-delay: 1.0s; }
+    .list-item-animation:nth-child(20) { animation-delay: 1.05s; }
+    .list-item-animation:nth-child(21) { animation-delay: 1.1s; }
+    .list-item-animation:nth-child(22) { animation-delay: 1.15s; }
+    .list-item-animation:nth-child(23) { animation-delay: 1.2s; }
+    .list-item-animation:nth-child(24) { animation-delay: 1.25s; }
+    .list-item-animation:nth-child(25) { animation-delay: 1.3s; }
+    .list-item-animation:nth-child(26) { animation-delay: 1.35s; }
+    .list-item-animation:nth-child(27) { animation-delay: 1.4s; }
+    .list-item-animation:nth-child(28) { animation-delay: 1.45s; }
+    .list-item-animation:nth-child(29) { animation-delay: 1.5s; }
+    .list-item-animation:nth-child(30) { animation-delay: 1.55s; }
+  </style>
 </head>
-<body class="text-slate-800">
+<body>
 
-    <header class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <h1 class="text-xl font-bold text-blue-600">전동킥보드 산재 판결 분석</h1>
-                <nav class="hidden md:flex items-center space-x-8 text-sm">
-                    <a href="#section-1" class="nav-link">사건 개요</a>
-                    <a href="#section-2" class="nav-link">핵심 쟁점</a>
-                    <a href="#section-3" class="nav-link">법원의 판단</a>
-                    <a href="#section-4" class="nav-link">최종 결론</a>
-                </nav>
-            </div>
+  <!-- 헤더 섹션 -->
+  <header class="header-bg text-white py-16 text-center shadow-lg">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 animate-fade-in-down">
+        산재 전문 김준영 변호사(법무법인 선인)과 함께하는 <br class="md:hidden">'판례 인사이드'
+      </h1>
+      <p class="text-xl md:text-2xl opacity-90 animate-fade-in-up">
+        복잡한 판례, 이제 쉽게 이해하고 실무에 적용하세요!
+      </p>
+    </div>
+  </header>
+
+  <!-- 메인 콘텐츠 섹션 -->
+  <main class="container mx-auto px-4 py-16">
+    <section class="mb-16 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold section-title mb-12">
+        주요 판례 분석 리스트
+      </h2>
+      <!-- 2열 그리드 레이아웃 적용 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <!-- 첫 번째 열 (15개 항목) -->
+        <div class="space-y-6">
+          <!-- 첫 번째 가이드 카드 (실제 파일 링크) -->
+          <a href="배달 라이더 노무사 가이드.html" class="list-card block text-left list-item-animation interactive">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              1. 배달 라이더 오토바이 사고 산재 판례 (서울행정법원 2024구합61490)
+            </h3>
+            <p class="text-gray-600 text-sm">
+              배달 중 신호위반 사고도 산재로 인정될 수 있을까? 과로와 업무상 환경이 사고에 미친 영향을 분석한 최신 판례입니다.
+            </p>
+          </a>
+
+          <!-- 두 번째 가이드 카드 (실제 파일 링크) -->
+          <a href="코로나 위암 사건 노무사 가이드.html" class="list-card block text-left list-item-animation interactive">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              2. 코로나19 관련 위암 순직 판례 (서울행정법원 2022구합75587)
+            </h3>
+            <p class="text-gray-600 text-sm">
+              업무 스트레스와 과로가 기존 질병을 악화시킨 경우, 업무 관련성이 인정될 수 있다는 중요한 판례입니다.
+            </p>
+          </a>
+
+          <!-- 예시 사례 3 ~ 15 (링크 없음) -->
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              3. 직장 내 괴롭힘으로 인한 우울증 산재 인정 사례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              지속적인 직장 내 괴롭힘으로 인해 발생한 우울증이 업무상 재해로 인정된 판례 분석입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              4. 택시 운전사의 과로사 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              장시간 운전으로 인한 뇌심혈관계 질환이 과로로 인정되어 산재가 승인된 사례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              5. 건설 현장 추락 사고, 안전 의무 위반 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              안전 장치 미비로 인한 추락 사고 발생 시 사업주의 책임 범위에 대한 판례 분석입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              6. 간접 고용 근로자의 산재 인정 범위 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              파견 및 용역 근로자의 업무상 재해 인정 여부에 대한 최신 판례 해설입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              7. 출퇴근 중 사고, 통상적인 경로 이탈 여부 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              출퇴근 중 발생한 사고에서 통상적인 경로를 벗어난 경우의 산재 인정 기준 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              8. 업무상 스트레스로 인한 공황장애 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              과도한 업무 스트레스로 인해 공황장애가 발병하여 산재로 인정된 사례를 다룹니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              9. 고객 응대 근로자의 감정 노동 스트레스 산재 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              고객의 폭언 등으로 인한 정신적 스트레스가 업무상 재해로 인정된 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              10. 해외 출장 중 발생한 사고의 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              해외 출장 중 발생한 사고가 업무상 재해로 인정된 기준과 관련 판례를 설명합니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              11. (예시) 특정 질병의 업무 관련성 입증 난이도 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              희귀 질환이나 만성 질환의 업무 관련성을 입증하는 데 어려움이 있는 경우의 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              12. (예시) 업무상 재해와 개인 질병의 경합 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              업무상 재해와 기존 개인 질병이 복합적으로 작용한 경우의 판례 분석입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              13. (예시) 직업병 인정 기준 및 최신 판례 동향
+            </h3>
+            <p class="text-gray-600 text-sm">
+              다양한 직업병의 인정 기준과 최근 법원의 판단 경향을 분석합니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              14. (예시) 업무상 사고 시 과실 상계 적용 여부 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              근로자의 과실이 있는 업무상 사고에서 산재 보상금 감액 여부에 대한 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              15. (예시) 산재 요양 기간 중 해고의 정당성 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산재로 요양 중인 근로자에 대한 해고가 부당 해고에 해당하는지 여부에 대한 판례입니다.
+            </p>
+          </div>
         </div>
-    </header>
 
-    <main class="max-w-6xl mx-auto p-4 md:p-8">
+        <!-- 두 번째 열 (15개 항목) -->
+        <div class="space-y-6">
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              16. (예시) 업무상 스트레스로 인한 자살의 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              과도한 업무 스트레스가 자살의 원인이 되어 산재로 인정된 중요한 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              17. (예시) 퇴직 후 발병한 질병의 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              퇴직 후 업무 관련성이 인정되어 산재로 승인된 질병 사례를 다룹니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              18. (예시) 건설 일용직 근로자의 산재 인정 절차 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              건설 현장 일용직 근로자의 산재 신청 및 인정 절차에 대한 판례 분석입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              19. (예시) 재택근무 중 발생한 사고의 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              코로나19 이후 증가한 재택근무 환경에서 발생한 사고의 산재 인정 여부 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              20. (예시) 업무상 재해와 민사상 손해배상 청구 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산재 보상 외에 사업주에게 민사상 손해배상을 청구할 수 있는지에 대한 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              21. (예시) 직장 내 성희롱으로 인한 정신적 피해 산재 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              직장 내 성희롱으로 인한 정신적 고통이 업무상 재해로 인정된 사례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              22. (예시) 업무 외 활동 중 발생한 사고의 산재 인정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              회식, 야유회 등 업무 외 활동 중 발생한 사고의 산재 인정 기준 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              23. (예시) 산재 보험급여 부정 수급에 대한 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산재 보험급여를 부정하게 수급한 경우의 법적 처벌 및 관련 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              24. (예시) 특수고용형태 근로자의 산재 인정 확대 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              보험설계사, 학습지 교사 등 특수고용형태 근로자의 산재 인정 범위 확대 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              25. (예시) 업무상 질병의 역학조사 중요성 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              업무상 질병 인정 시 역학조사의 역할과 중요성을 강조한 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              26. (예시) 사업주의 산재 은폐에 대한 가중 처벌 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산업 재해 발생 후 사업주가 이를 은폐하려 한 경우의 가중 처벌 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              27. (예시) 업무상 재해와 산재 보험료율 산정 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              사업장의 산재 발생률이 보험료율에 미치는 영향 및 관련 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              28. (예시) 산재 장해 등급 판정 기준 및 분쟁 사례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산재로 인한 장해 등급 판정 기준과 등급 관련 분쟁 사례를 다룹니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              29. (예시) 산업 재해 예방 의무 위반 사업주 처벌 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산업안전보건법상 안전 의무를 위반하여 사고가 발생한 경우 사업주 처벌 판례입니다.
+            </p>
+          </div>
+          <div class="list-card block text-left list-item-animation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">
+              30. (예시) 업무 복귀 지원 프로그램의 법적 의무 판례
+            </h3>
+            <p class="text-gray-600 text-sm">
+              산재 근로자의 업무 복귀를 위한 사업주의 지원 의무 및 관련 판례입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <section id="section-1" class="mb-16">
-            <h2 class="text-3xl font-bold text-center mb-4">하나의 사고, 두 개의 시선</h2>
-            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 이야기는 한 전기 기술자의 평범했던 퇴근길에서 시작됩니다. 전동킥보드 사고가 어떻게 법적 다툼으로 이어졌고, 법원은 어떤 결론을 내렸는지 시간 순서에 따라 알아보겠습니다.</p>
-            <div class="card p-6 md:p-8">
-                <div class="max-w-4xl mx-auto">
-                    <div class="relative">
-                        <div class="timeline-item relative pb-12">
-                            <div class="flex items-start">
-                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">📅</div>
-                                <div class="ml-12">
-                                    <h3 class="font-bold text-lg">2023년 8월 15일: 사고 발생</h3>
-                                    <p class="text-slate-600 mt-1">건설현장 전기공 A씨, 퇴근길에 전동킥보드를 운전하던 중 적색 신호에 횡단보도를 건너다 승용차와 충돌하여 무릎에 큰 부상을 입었습니다.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item relative pb-12">
-                            <div class="flex items-start">
-                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">🛴</div>
-                                <div class="ml-12">
-                                    <h3 class="font-bold text-lg">2023년 10월 6일: 요양급여 신청</h3>
-                                    <p class="text-slate-600 mt-1">A씨는 이 사고가 업무와 관련된 '출퇴근 재해'라며, 치료비 지원을 위해 근로복지공단에 요양급여를 신청했습니다.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item relative pb-12">
-                            <div class="flex items-start">
-                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">🚫</div>
-                                <div class="ml-12">
-                                    <h3 class="font-bold text-lg">2024년 1월 12일: 공단의 불승인 처분</h3>
-                                    <p class="text-slate-600 mt-1">공단은 "사고의 원인이 A씨의 중대한 법규 위반(신호 위반)이라는 '범죄행위'에 있으므로 업무상 재해로 볼 수 없다"며 신청을 거절했습니다.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="timeline-item relative">
-                            <div class="flex items-start">
-                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">⚖️</div>
-                                <div class="ml-12">
-                                    <h3 class="font-bold text-lg">이후: 법원의 문을 두드리다</h3>
-                                    <p class="text-slate-600 mt-1">A씨는 공단의 결정에 불복하고, 이 처분을 취소해달라며 서울행정법원에 소송을 제기했습니다.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- 추가 정보 또는 CTA 섹션 (선택 사항) -->
+    <section class="text-center bg-blue-50 p-10 rounded-xl shadow-inner animate-fade-in-up mt-16">
+      <h2 class="text-2xl md:text-3xl font-bold text-blue-700 mb-6">
+        노무사님, 더 궁금한 점이 있으신가요?
+      </h2>
+      <p class="text-gray-700 max-w-2xl mx-auto mb-8">
+        저희 가이드가 노무사님의 업무에 도움이 되기를 바랍니다. 추가적인 문의나 다른 판례 분석 요청이 있으시면 언제든지 문의해주세요.
+      </p>
+      <a href="#" class="btn-primary bg-green-600 hover:bg-green-700">
+        문의하기
+      </a>
+    </section>
+  </main>
 
-        <section id="section-2" class="mb-16">
-            <h2 class="text-3xl font-bold text-center mb-4">핵심 쟁점: '범죄행위'의 경계</h2>
-            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 사건의 가장 큰 다툼은 A씨의 '신호 위반'이 산재보험 적용을 배제할 정도의 '범죄행위'에 해당하는지 여부였습니다. 양측의 팽팽한 주장을 확인해보세요.</p>
-            <div class="grid md:grid-cols-2 gap-8 items-center">
-                <div class="card p-6 md:p-8 text-center">
-                    <h3 class="text-xl font-bold text-red-600 mb-2">근로복지공단의 주장</h3>
-                    <p class="text-lg font-semibold text-slate-700 mb-4">"명백한 법규 위반은 개인의 책임"</p>
-                    <p class="text-slate-600">신호 위반은 스스로 위험을 자초한 중과실 행위이자 교통사고처리특례법을 위반한 범죄행위입니다. 이는 산재보험법이 보호하지 않는 예외 사유에 해당합니다.</p>
-                </div>
-                <div class="card p-6 md:p-8 text-center">
-                    <h3 class="text-xl font-bold text-green-600 mb-2">A씨(원고)의 주장</h3>
-                    <p class="text-lg font-semibold text-slate-700 mb-4">"출퇴근 중 발생한 통상적 사고"</p>
-                    <p class="text-slate-600">교통법규를 위반했지만, 이것이 고의적 자해나 중대 범죄와 동일시될 수는 없습니다. 퇴근 과정에서 발생한 사고이므로 업무상 재해로 인정해야 합니다.</p>
-                </div>
-            </div>
-             <div class="card p-6 mt-8">
-                 <h3 class="text-xl font-bold text-center text-slate-800 mb-4">쟁점 시각화</h3>
-                 <p class="text-center text-slate-600 mb-4">이 사건은 결국 하나의 질문으로 모아집니다. 'A씨의 행동을 어디까지 개인의 잘못으로 볼 것인가?'</p>
-                 <div class="chart-container">
-                    <canvas id="disputeChart"></canvas>
-                 </div>
-             </div>
-        </section>
+  <!-- 푸터 섹션 -->
+  <footer class="bg-gray-800 text-white py-8 text-center mt-16">
+    <div class="container mx-auto px-4">
+      <p>&copy; 2025 Labor Law Guidance. All rights reserved.</p>
+      <p class="mt-2 text-sm opacity-80">
+        본 페이지는 노무사 실무 참고용으로 제작되었습니다.
+      </p>
+    </div>
+  </footer>
 
-        <section id="section-3" class="mb-16">
-            <h2 class="text-3xl font-bold text-center mb-4">법원의 판단: 근로자의 편에 서다</h2>
-            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">법원은 여러 사정을 종합하여 A씨의 손을 들어주었습니다. 판결의 논리를 뒷받침한 핵심적인 이유들을 아래 카드에서 클릭하여 자세히 살펴보세요.</p>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="judgment-card card p-6" data-key="1">
-                    <h3 class="font-bold text-lg text-blue-700">1. '범죄행위'의 엄격한 해석</h3>
-                    <p class="text-slate-500 mt-1">단순 교통법규 위반은 '그것'이 아니다.</p>
-                    <div class="judgment-content text-slate-600">산재보험법에서 말하는 '범죄행위'는 보험 제도의 근간을 흔들 만큼 위법성이 매우 큰 경우를 의미합니다. 법원은 모든 교통법규 위반을 여기에 해당한다고 볼 수는 없다고 선을 그었습니다.</div>
-                </div>
-                <div class="judgment-card card p-6" data-key="2">
-                    <h3 class="font-bold text-lg text-blue-700">2. 업무상 피로와 순간의 실수</h3>
-                    <p class="text-slate-500 mt-1">고의가 아닌 판단 착오의 가능성.</p>
-                    <div class="judgment-content text-slate-600">A씨는 일용직으로 하루 종일 근무하여 육체적·정신적 피로도가 상당했을 것입니다. 법원은 이를 고려할 때, A씨의 신호위반이 고의나 중대한 부주의라기보다는 순간적인 집중력 저하나 판단 착오였을 가능성이 있다고 보았습니다.</div>
-                </div>
-                <div class="judgment-card card p-6" data-key="3">
-                    <h3 class="font-bold text-lg text-blue-700">3. 사회적·제도적 배경</h3>
-                    <p class="text-slate-500 mt-1">미비했던 전동킥보드 관련 규제.</p>
-                    <div class="judgment-content text-slate-600">사고 당시, 전동킥보드 이용자는 급증했지만 관련 법규나 안전 교육은 미비한 상태였습니다. 이러한 사회적 배경 속에서 A씨의 행위가 산재보험 보호에서 배제될 만큼 비난 가능성이 크다고 보기는 어렵다고 판단했습니다.</div>
-                </div>
-                <div class="judgment-card card p-6" data-key="4">
-                    <h3 class="font-bold text-lg text-blue-700">4. 통상 수반되는 위험의 범위</h3>
-                    <p class="text-slate-500 mt-1">출퇴근길에 일어날 수 있는 사고.</p>
-                    <div class="judgment-content text-slate-600">법원은 A씨의 사고가 출퇴근 과정에서 통상적으로 발생할 수 있는 위험의 범위를 벗어났다고 보기 어렵다고 판단했습니다. 즉, 특별히 이례적인 사고가 아니라는 의미입니다.</div>
-                </div>
-                <div class="judgment-card card p-6" data-key="5">
-                    <h3 class="font-bold text-lg text-blue-700">5. 입증 책임의 원칙</h3>
-                    <p class="text-slate-500 mt-1">'범죄행위'임은 공단이 증명해야.</p>
-                    <div class="judgment-content text-slate-600">A씨의 행위가 예외적인 '범죄행위'에 해당한다는 사실은 혜택을 주지 않으려는 근로복지공단 측에서 증명해야 합니다. 법원은 공단이 이를 충분히 증명하지 못했다고 보았습니다.</div>
-                </div>
-                <div class="judgment-card card p-6" data-key="6">
-                    <h3 class="font-bold text-lg text-blue-700">6. 산재보험의 취지</h3>
-                    <p class="text-slate-500 mt-1">근로자 보호라는 대원칙.</p>
-                    <div class="judgment-content text-slate-600">산재보험은 업무상 재해를 입은 근로자와 그 가족의 생활을 보장하는 것을 목적으로 합니다. 근로자의 사소한 과실을 이유로 보호 범위를 지나치게 좁게 해석하는 것은 제도의 본질에 어긋난다고 보았습니다.</div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="section-4">
-             <h2 class="text-3xl font-bold text-center mb-4">최종 결론: 상식과 원칙의 승리</h2>
-             <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">모든 과정을 검토한 법원은 근로복지공단의 처분이 위법하다고 최종 판결했습니다.</p>
-            <div class="card p-8 md:p-12 text-center bg-blue-600 text-white">
-                 <span class="text-5xl" role="img" aria-label="gavel">⚖️</span>
-                <h3 class="text-2xl md:text-3xl font-bold mt-4 mb-6">"피고가 원고에 대하여 한 최초요양 불승인처분을 취소한다."</h3>
-                <p class="max-w-4xl mx-auto">이 판결은 근로자의 과실이 사고 발생에 일부 기여했더라도, 그것이 고의적이거나 사회 통념상 용납하기 어려운 수준의 중대 범죄가 아닌 한, 산재보험의 보호 울타리 안에서 폭넓게 보호해야 한다는 원칙을 재확인한 의미 있는 사례입니다. 소송비용 또한 근로복지공단이 부담하게 되었습니다.</p>
-            </div>
-        </section>
-    </main>
-
-    <footer class="text-center p-8 mt-8 text-sm text-slate-500">
-        <p>&copy; 2025 Interactive Case Analysis. All rights reserved.</p>
-        <p class="mt-1">본 콘텐츠는 서울행정법원 2024구단75935 판결문을 기반으로 정보 제공 목적으로 제작되었습니다.</p>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const disputeCtx = document.getElementById('disputeChart');
-            if (disputeCtx) {
-                new Chart(disputeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['공단 주장 (산재 아님)', 'A씨 주장 (산재 맞음)'],
-                        datasets: [{
-                            data: [50, 50],
-                            backgroundColor: ['#ef4444', '#22c55e'],
-                            borderColor: '#f8fafc',
-                            borderWidth: 4,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } },
-                            tooltip: {
-                                callbacks: {
-                                    title: function(tooltipItems) {
-                                        let label = tooltipItems[0].label;
-                                        if(Array.isArray(label)){ return label.join(' '); }
-                                        return label;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            document.querySelectorAll('.judgment-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const content = card.querySelector('.judgment-content');
-                    const isShown = content.classList.contains('show');
-                    
-                    document.querySelectorAll('.judgment-content.show').forEach(openContent => {
-                        if(openContent !== content) openContent.classList.remove('show');
-                    });
-
-                    if(isShown) {
-                        content.classList.remove('show');
-                    } else {
-                        content.classList.add('show');
-                    }
-                });
-            });
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            const sections = document.querySelectorAll('main section');
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        navLinks.forEach(link => {
-                            const linkHref = link.getAttribute('href');
-                            link.classList.toggle('active', linkHref === `#${entry.target.id}`);
-                        });
-                    }
-                });
-            }, { rootMargin: '-50% 0px -50% 0px' });
-            
-            sections.forEach(section => observer.observe(section));
-        });
-    </script>
 </body>
 </html>
