@@ -110,6 +110,37 @@
     .list-item-animation:nth-child(28) { animation-delay: 1.45s; }
     .list-item-animation:nth-child(29) { animation-delay: 1.5s; }
     .list-item-animation:nth-child(30) { animation-delay: 1.55s; }
+
+    /* 카테고리 버튼 스타일 */
+    .category-button {
+      background-color: #e0f2fe; /* 연한 파란색 배경 */
+      color: #2563eb; /* 파란색 텍스트 */
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px; /* 완전 둥근 모서리 (pill shape) */
+      font-weight: 600; /* 세미볼드 */
+      transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+      white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+      border: 1px solid #93c5fd; /* 테두리 */
+    }
+    .category-button:hover {
+      background-color: #2563eb; /* 호버 시 진한 파란색 배경 */
+      color: white; /* 호버 시 흰색 텍스트 */
+    }
+    /* 카테고리 라벨 박스 스타일 */
+    .category-label-box {
+      background-color: #2563eb; /* 진한 파란색 배경 */
+      color: white;
+      padding: 1.5rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 1.25rem; /* 글자 크기 조정 */
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 100px; /* 최소 너비 조정 */
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+    }
   </style>
 </head>
 <body>
@@ -123,6 +154,31 @@
       <p class="text-xl md:text-2xl opacity-90 animate-fade-in-up">
         복잡한 판례, 이제 쉽게 이해하고 실무에 적용하세요!
       </p>
+
+      <!-- 카테고리 박스 추가 -->
+      <div class="mt-8 flex flex-col md:flex-row items-center justify-center gap-4 animate-fade-in-up max-w-5xl mx-auto px-4">
+        <!-- '카테고리' 라벨 박스 -->
+        <div class="category-label-box">
+          카테고리
+        </div>
+        <!-- 카테고리 버튼들 -->
+        <div class="flex flex-wrap justify-center gap-3 flex-grow">
+          <button class="category-button">과로사</button>
+          <button class="category-button">직장내괴롭힘</button>
+          <button class="category-button">출퇴근사고</button>
+          <button class="category-button">직업병</button>
+          <button class="category-button">정신질환</button>
+          <button class="category-button">특수고용직</button>
+          <button class="category-button">요양급여</button>
+          <button class="category-button">업무상사고</button>
+          <button class="category-button">산업재해</button>
+          <button class="category-button">재해인정</button>
+          <button class="category-button">손해배상</button>
+          <button class="category-button">보험급여</button>
+        </div>
+      </div>
+      <!-- 카테고리 박스 끝 -->
+
     </div>
   </header>
 
@@ -413,5 +469,8 @@
     </div>
   </footer>
 
+  <script>
+    // YouTube 플레이어 관련 JavaScript 코드 제거 (이전 요청에 따라 이미 제거됨)
+  </script>
 </body>
 </html>
