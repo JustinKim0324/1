@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인터랙티브 인포그래픽: 신호위반 전동킥보드 출퇴근산재 판결 및 전문가 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nanum-myeongjo@1.0/nanummyeongjo.min.css">
+    <style>
+        /* 공통 스타일 */
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; /* slate-50 */ color: #1e293b; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        .card:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        html { scroll-behavior: smooth; }
+        .verdict-font { font-family: 'Nanum Myeongjo', serif; }
+        
+        /* 네비게이션 및 섹션 스타일 */
+        section { padding-top: 5rem; padding-bottom: 4rem; border-bottom: 1px solid #e5e7eb; }
+        section:last-child { border-bottom: none; }
+        .nav-tabs { border-bottom: 2px solid #e5e7eb; }
+        .nav-link { transition: color 0.3s, border-color 0.3s; color: #475569; /* slate-600 */ border-bottom: 3px solid transparent; padding: 0.75rem 1rem; cursor: pointer; white-space: nowrap; }
+        .nav-link.active { color: #2563eb; /* blue-600 */ border-bottom-color: #2563eb; font-weight: 700; }
+
+        /* 판결문 섹션 스타일 */
+        .timeline-item::before { content: ''; position: absolute; left: 11px; top: 12px; bottom: -12px; width: 2px; background-color: #93c5fd; /* blue-300 */ }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-icon { z-index: 1; }
+        .judgment-card { cursor: pointer; }
+        .judgment-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out, padding-bottom 0.5s ease-in-out; }
+        .judgment-content.show { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem;}
+        .chart-container { position: relative; width: 100%; max-width: 300px; margin: 1rem auto; height: 300px; max-height: 300px; }
+
+        /* 전문가가이드 섹션 스타일 */
+        .expert-guide .card { padding: 1.5rem; transition: transform 0.2s ease-in-out; }
+        .expert-guide .card:hover { transform: translateY(-3px); }
+        .expert-guide .section-title { color: #2563eb; }
+        .expert-guide .flow-box { background-color: #e0f2fe; /* blue-100 */ border: 1px solid #93c5fd; /* blue-300 */ border-radius: 0.5rem; padding: 1rem; text-align: center; }
+        .expert-guide .flow-arrow { display: flex; justify-content: center; margin: 0.5rem 0; }
+        .expert-guide .flow-arrow span { font-size: 1.5rem; color: #60a5fa; /* blue-400 */ }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <h1 class="text-xl font-bold text-blue-600 py-4 md:py-0 shrink-0">신호위반 전동킥보드 출퇴근산재 판결</h1>
+                <nav class="nav-tabs flex items-center space-x-1 md:space-x-4 text-sm w-full md:w-auto overflow-x-auto">
+                    <a class="nav-link active" href="#intro">사건 개요</a>
+                    <a class="nav-link" href="#issue">핵심 쟁점</a>
+                    <a class="nav-link" href="#judgment">법원의 판단</a>
+                    <a class="nav-link" href="#conclusion">최종 결론</a>
+                    <a class="nav-link" href="#full-text">판결문</a>
+                    <a class="nav-link" href="#expert-guide">전문가가이드</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-8">
+
+        <!-- A.html 콘텐츠 -->
+        <section id="intro">
+            <h2 class="text-3xl font-bold text-center mb-4">하나의 사고, 두 개의 시선</h2>
+            <p class="text-center text-slate-600 mb-4 text-base md:text-lg font-semibold">서울행정법원 2025. 4. 24. 선고 2024구단75935 판결 요양불승인처분취소</p>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 이야기는 한 전기 기술자의 평범했던 퇴근길에서 시작됩니다. 전동킥보드 사고가 어떻게 법적 다툼으로 이어졌고, 법원은 어떤 결론을 내렸는지 시간 순서에 따라 알아보겠습니다.</p>
+            <div class="card p-6 md:p-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="relative">
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">📅</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2023년 8월 15일: 퇴근길 사고 발생</h3>
+                                    <p class="text-slate-600 mt-1">건설현장 전기공 A씨, 퇴근길에 전동킥보드를 운전하던 중 적색 신호에 횡단보도를 건너다 승용차와 충돌하여 좌측 무릎 골절 등 큰 부상을 입었습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center">📄</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2023년 10월 6일: 요양급여 신청</h3>
+                                    <p class="text-slate-600 mt-1">A씨는 이 사고가 업무와 관련된 '출퇴근 재해'라며, 치료비 지원을 위해 근로복지공단에 요양급여를 신청했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative pb-12">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">🚫</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">2024년 1월 12일: 공단의 불승인 처분</h3>
+                                    <p class="text-slate-600 mt-1">공단은 "사고의 원인이 A씨의 중대한 법규 위반(신호 위반)이라는 '범죄행위'에 있으므로 업무상 재해로 볼 수 없다"며 신청을 거절했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative">
+                            <div class="flex items-start">
+                                <div class="timeline-icon absolute left-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">⚖️</div>
+                                <div class="ml-12">
+                                    <h3 class="font-bold text-lg">이후: 법원의 문을 두드리다</h3>
+                                    <p class="text-slate-600 mt-1">A씨는 공단의 결정에 불복하고, 이 처분을 취소해달라며 서울행정법원에 소송을 제기했습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="issue">
+            <h2 class="text-3xl font-bold text-center mb-4">핵심 쟁점: '범죄행위'의 경계</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">이 사건의 가장 큰 다툼은 A씨의 '신호 위반'이 산재보험 적용을 배제할 정도의 '범죄행위'에 해당하는지 여부였습니다. 양측의 팽팽한 주장을 확인해보세요.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6 md:p-8 text-center">
+                    <h3 class="text-xl font-bold text-red-600 mb-2">근로복지공단의 주장</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-4">"명백한 법규 위반은 개인의 책임"</p>
+                    <p class="text-slate-600">신호 위반은 스스로 위험을 자초한 중과실 행위이자 교통사고처리특례법을 위반한 '범죄행위'입니다. 이는 산재보험법이 보호하지 않는 예외 사유에 해당합니다.</p>
+                </div>
+                <div class="card p-6 md:p-8 text-center">
+                    <h3 class="text-xl font-bold text-green-600 mb-2">A씨(원고)의 주장</h3>
+                    <p class="text-lg font-semibold text-slate-700 mb-4">"출퇴근 중 발생한 통상적 사고"</p>
+                    <p class="text-slate-600">교통법규를 위반했지만, 이것이 고의적 자해나 중대 범죄와 동일시될 수는 없습니다. 퇴근 과정에서 발생한 사고이므로 업무상 재해로 인정해야 합니다.</p>
+                </div>
+            </div>
+             <div class="card p-6 mt-8">
+                 <h3 class="text-xl font-bold text-center text-slate-800 mb-4">쟁점 시각화</h3>
+                 <p class="text-center text-slate-600 mb-4">이 사건은 결국 하나의 질문으로 모아집니다. 'A씨의 행동을 어디까지 개인의 잘못으로 볼 것인가?'</p>
+                 <div class="chart-container">
+                     <canvas id="disputeChart"></canvas>
+                 </div>
+             </div>
+        </section>
+
+        <section id="judgment">
+            <h2 class="text-3xl font-bold text-center mb-4">법원의 판단: 근로자의 편에 서다</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">법원은 여러 사정을 종합하여 A씨의 손을 들어주었습니다. 판결의 논리를 뒷받침한 핵심적인 이유들을 아래 카드에서 클릭하여 자세히 살펴보세요.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">1. '범죄행위'의 엄격한 해석</h3>
+                    <p class="text-slate-500 mt-1">단순 교통법규 위반 ≠ 산재 제외 '범죄'</p>
+                    <div class="judgment-content text-slate-600">산재보험법에서 말하는 '범죄행위'는 보험 제도의 근간을 흔들 만큼 위법성이 매우 큰 경우를 의미합니다. 법원은 모든 교통법규 위반을 여기에 해당한다고 볼 수는 없다고 선을 그었습니다. </div>
+                </div>
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">2. 업무상 피로와 순간의 실수</h3>
+                    <p class="text-slate-500 mt-1">고의가 아닌 판단 착오의 가능성</p>
+                    <div class="judgment-content text-slate-600">A씨는 일용직으로 장시간 근무하여 육체적·정신적 피로도가 상당했을 것입니다. 법원은 이를 고려할 때, 신호위반이 고의나 중대한 부주의라기보다는 순간적인 집중력 저하나 판단 착오였을 가능성이 있다고 보았습니다. </div>
+                </div>
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">3. 사회적·제도적 배경</h3>
+                    <p class="text-slate-500 mt-1">미비했던 전동킥보드 관련 규제</p>
+                    <div class="judgment-content text-slate-600">사고 당시, 전동킥보드 이용자는 급증했지만 관련 법규나 안전 교육은 미비한 상태였습니다. 이러한 사회적 배경 속에서 A씨의 행위가 산재보험 보호에서 배제될 만큼 비난 가능성이 크다고 보기는 어렵다고 판단했습니다. </div>
+                </div>
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">4. 통상 수반되는 위험의 범위</h3>
+                    <p class="text-slate-500 mt-1">출퇴근길에 일어날 수 있는 사고</p>
+                    <div class="judgment-content text-slate-600">법원은 A씨의 사고가 출퇴근 과정에서 통상적으로 발생할 수 있는 위험의 범위를 벗어났다고 보기 어렵다고 판단했습니다. 즉, 특별히 이례적인 사고가 아니라는 의미입니다.</div>
+                </div>
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">5. 입증 책임의 원칙</h3>
+                    <p class="text-slate-500 mt-1">'범죄행위'임은 공단이 증명해야</p>
+                    <div class="judgment-content text-slate-600">A씨의 행위가 예외적인 '범죄행위'에 해당한다는 사실은 혜택을 주지 않으려는 근로복지공단 측에서 증명해야 합니다. 법원은 공단이 이를 충분히 증명하지 못했다고 보았습니다. </div>
+                </div>
+                <div class="judgment-card card p-6">
+                    <h3 class="font-bold text-lg text-blue-700">6. 산재보험의 취지</h3>
+                    <p class="text-slate-500 mt-1">근로자 보호라는 대원칙</p>
+                    <div class="judgment-content text-slate-600">산재보험은 업무상 재해를 입은 근로자와 그 가족의 생활을 보장하는 것을 목적으로 합니다. 근로자의 사소한 과실을 이유로 보호 범위를 지나치게 좁게 해석하는 것은 제도의 본질에 어긋난다고 보았습니다. </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="conclusion">
+             <h2 class="text-3xl font-bold text-center mb-4">최종 결론: 상식과 원칙의 승리</h2>
+             <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">모든 과정을 검토한 법원은 근로복지공단의 처분이 위법하다고 최종 판결했습니다.</p>
+            <div class="card p-8 md:p-12 text-center bg-blue-600 text-white">
+                <span class="text-5xl" role="img" aria-label="gavel">⚖️</span>
+                <h3 class="text-2xl md:text-3xl font-bold mt-4 mb-6 verdict-font">"피고가 원고에 대하여 한 최초요양 불승인처분을 취소한다."</h3>
+                <p class="max-w-4xl mx-auto">이 판결은 근로자의 과실이 사고 발생에 일부 기여했더라도, 그것이 고의적이거나 사회 통념상 용납하기 어려운 수준의 중대 범죄가 아닌 한, 산재보험의 보호 울타리 안에서 폭넓게 보호해야 한다는 원칙을 재확인한 의미 있는 사례입니다. 소송비용 또한 근로복지공단이 부담하게 되었습니다.</p>
+            </div>
+        </section>
+
+        <section id="full-text">
+            <h2 class="text-3xl font-bold text-center mb-4 verdict-font">판결문 보기</h2>
+            <p class="text-center text-slate-600 mb-12 max-w-3xl mx-auto">서울행정법원 2024구단75935 판결문입니다.</p>
+            <div class="card p-6 md:p-8 lg:p-12 verdict-font bg-white leading-relaxed text-gray-800" style="font-family: 'Malgun Gothic', sans-serif;">
+                <h1 class="text-center text-2xl font-bold mb-4">서울행정법원</h1>
+                <h2 class="text-center text-3xl font-bold mb-10" style="letter-spacing: 1em;">판 결</h2>
+                <div class="grid grid-cols-[max-content,1fr] gap-x-6 gap-y-2 mb-6 max-w-lg mx-auto">
+                    <span class="font-bold">사 건</span><span>2024구단75935 요양불승인처분취소</span>
+                    <span class="font-bold">원 고</span><span>A</span>
+                    <span class="font-bold">피 고</span><span>근로복지공단</span>
+                    <span class="font-bold">변론종결</span><span>2025. 4. 10.</span>
+                    <span class="font-bold">판결선고</span><span>2025. 4. 24.</span>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">주 문</h3>
+                        <p style="text-indent: 1.5em;">1. 피고가 2024. 1. 12. 원고에 대하여 한 최초요양 불승인처분을 취소한다.</p>
+                        <p style="text-indent: 1.5em;">2. 소송비용은 피고가 부담한다.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">청 구 취 지</h3>
+                        <p style="text-indent: 1.5em;">주문과 같다.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-2">이 유</h3>
+                        <p class="font-semibold mt-4 mb-2">1. 처분의 경위</p>
+                        <p style="text-indent: 1.5em;">가. 원고는 2023. 7. 3.부터 B 주식회사의 평택시 소재 건설공사 사업장(이하 '이 사건 사업장'이라 한다)에서 전기공(배관공)으로 근무하던 사람이다.</p>
+                        <p style="text-indent: 1.5em;">나. 원고는 2023. 8. 15. 14:13경 퇴근길에 평소 사용하던 원동기장치자전거(이하 '전동킥보드'라 한다)를 운전하여 평택시 소재 사거리에서 별지1 그림과 같이 횡단보도 적색신호에 C근린공원 쪽 인도에서 D 쪽 횡단보도로 진입하여 횡단하던 중 E 쪽에서 C근린공원 쪽으로 우회전하는 (비실명화로 생략) 승용차량(이하 '상대차량'이라 한다) 조수석 쪽 앞 펜더 부분을 전동킥보드 앞부분으로 충격하는 사고를 발생시켰다(이하 '이 사건 사고'라 한다).</p>
+                        <p style="text-indent: 1.5em;">다. 원고는 이 사건 사고로 '좌측 슬관절 근위 경골 골절, 좌측 슬관절 외측 반월상 연골판 파열'(이하 '이 사건 상병'이라 한다) 진단을 받고, 2023. 10. 6. 이 사건 상병이 업무상 재해에 해당한다는 이유로 피고에게 요양급여를 신청하였다.</p>
+                        <p style="text-indent: 1.5em;">라. 피고는 '이 사건 사고는 퇴근 중 발생한 사고로 확인되나, 사고의 원인이 원고가 유발(자초)한 측면이 강한 중과실 사고로 교통사고처리특례법위반에 해당되어 산업재해보상보험법(이하 '산재보험법'이라 한다) 제37조 제2항 근로자의 고의·자해행위나 범죄행위 또는 그것이 원인이 되어 발생한 경우에 해당되어 업무상 재해로 보지 않는다'는 이유로, 2024. 1. 12. 원고에게 요양급여 불승인처분을 통지하였다(이하 '이 사건 처분'이라 한다).</p>
+                        <p style="text-indent: 1.5em;">[인정근거] 다툼 없는 사실, 갑 제1, 3, 4호증, 을 제1, 2, 4, 5호증(가지번호 있는 것은 가지번호 포함)의 각 기재, 변론 전체의 취지</p>
+
+                        <p class="font-semibold mt-4 mb-2">2. 관계 법령</p>
+                        <p style="text-indent: 1.5em;">별지2 기재와 같다.</p>
+
+                        <p class="font-semibold mt-4 mb-2">3. 이 사건 처분의 위법 여부</p>
+                        <p class="font-semibold mt-4 mb-2">가. 원고의 주장 요지</p>
+                        <p style="text-indent: 1.5em;">원고의 교통법규 위반행위는 중대한 법규위반이라고 볼 수 없고, 원고의 범죄행위가 원인이 되어 이 사건 사고 및 상병이 발생하였다고 볼 수 없으므로, 이 사건에 산재보험법 제37조 제2항 본문이 적용될 수 없다.</p>
+                        <p class="font-semibold mt-4 mb-2">나. 판단</p>
+                        <p style="text-indent: 1.5em;">1) 산재보험법 제37조 제2항 본문에서 규정하고 있는 '근로자의 범죄행위가 원인이 되어 발생한 사망'이란 근로자의 범죄행위가 사망 등의 직접 원인이 되는 경우를 의미하는 것으로, 근로자가 업무수행을 위하여 운전을 하던 중 발생한 교통사고로 인하여 사망한 경우, 해당 사고가 근로자의 업무수행을 위한 운전 과정에서 통상 수반되는 위험의 범위 내에 있는 것으로 볼 수 있다면, 그 사고가 중앙선 침범으로 일어났다는 사정만으로 업무상 재해가 아니라고 섣불리 단정하여서는 아니 되고, 사고의 발생 경위와 양상, 운전자의 운전 능력 등과 같은 사고 발생 당시의 상황을 종합적으로 고려하여 판단하여야 한다(대법원 2022. 5. 26. 선고 2022두30072 판결 참조).</p>
+                        <p style="text-indent: 1.5em;">2) 앞서 인정한 사실, 앞서 든 증거들에 변론 전체의 취지를 더하여 인정되는 아래와 같은 사정 등을 종합하면, 이 사건 상병이 산재보험법 제37조 제2항 본문에서 정한 '원고의 범죄행위 또는 그것이 원인이 되어 발생한 부상'에 해당한다고 보기 어렵다. 따라서 이와 다른 전제에서 한 이 사건 처분은 위법하다.</p>
+                        <p style="text-indent: 1.5em;">① 산재보험법 제37조 제1항은 요양급여 지급 대상이 되는 업무상 재해 인정 기준을 상세하게 규정하는 한편, 별도로 제2항 본문에서 '근로자의 범죄행위'를 업무상 재해 인정의 예외로 들고 있다. 또한 이 사건 사고 및 상병이 원고의 '범죄행위'로 인해 발생하였다는 점은 요양급여지급의 예외 사유에 해당하므로, 이 사건 처분과 같이 피고가 원고의 권한 행사 신청을 거부하는 처분을 내린 경우 그 권한 행사를 저지하거나 권한 자체를 상실시키는 규정의 요건사실에 관한 증명책임은 피고에게 있다고 보아야 한다.</p>
+                        <p style="text-indent: 1.5em;">② 산재보험법 제37조 제2항이 '근로자의 범죄행위 또는 그것이 원인이 되어 발생한 부상'을 업무상 재해에서 배제하려는 취지는 범죄행위로 인한 보험사고 그 자체의 위법성 때문에 징벌적·보험정책적 의미에서 보험급여를 행하지 않겠다는 것뿐만 아니라 우연성의 결여로 보험사고성이 상실되기 때문에 산재보험제도의 본질에 비추어 보험급여를 하지 않겠다는 취지로 해석된다. 대표적 사적(私的) 보험인 자동차보험에서는 교통사고처리 특례법 규정 사고들을 보험사고로 받아들임을 원칙으로 하고 있다. 따라서 산재보험법 제37조 제2항 본문의 '범죄행위 또는 그것이 원인이 되어 발생한 부상'은 사고 및 부상의 발생 원인이 단순히 '범죄행위'에 해당하는지 여부에 따라 업무상 재해를 판단할 것이 아니라, 앞서 본 법리와 같이 해당 사고 및 부상이 근로자의 업무수행 과정에서 통상 수반되는 위험의 범위 내에 있는지를 실질적인 기준으로 삼아 개별적인 사안에 따라 업무상 재해 여부를 판단하여야 하므로, 이 사건 사고 및 상병의 원인이 원고의 신호위반 또는 통행방법위반이라는 사정만으로 원고의 위반행위가 산재보험법 제37조 제2항 본문의 '범죄행위'에 해당한다고 단정할 수 없다. </p>
+                        <p style="text-indent: 1.5em;">③ 이 사건 사고일 06:00경부터 14:00경까지 일용직으로 근무한 원고는 이 사건 사고 당시 육체적·정신적 피로도가 상당히 누적된 상태였을 것으로 보인다. 여기에 원고가 이 사건 사고 이전에 교통법규를 위반하여 사고를 발생시켰다는 사실을 인정할 만한 자료가 없는 점, 원고가 횡단보도에 진입한 직후 바로 우회전하던 상대차량과 충돌한 점을 보태어 보면, 원고가 이 사건 사고 당시 순간적인 집중력 저하 또는 판단착오로 신호를 위반하였을 가능성이 있어, 운전자로서 준수해야 하는 주의의무를 현저히 해태하였다고 단정할 수는 없다. 원고가 사전에 자신의 신호위반 또는 상대차량의 진행을 인식하고도 이를 용인 내지 감수하였다는 사실을 확인할 수 있는 블랙박스 영상 등도 없다.</p>
+                        <p style="text-indent: 1.5em;">④ 전동킥보드 운전자는 킥보드에서 내려서 킥보드를 끌고 가는 경우에만 횡단보도를 따라 보행할 수 있고, 킥보드를 타고 횡단보도를 횡단할 수는 없으며[구 도로교통법 (2023.10.19. 법률 제19357호로 개정되기 전의 것, 이하 같다) 제2조 제19의2호, 제21의2호, 제13조의2 제6항], 특별한 사정이 없는 한 보도로 통행할 수 없다(구 도로교통법 제13조의2 제1 내지 4항). 그러나 (a) 이 사건 사고 당시 전동킥보드의 이용자가 급격히 증가하는데 비해 도로의 통행방법 등을 제대로 알지 못하는 경우가 많고 이를 규제하기 위한 법적·제도적 장치도 다소 미비하였던 것으로 보이는 점, (b) 원고가 전동킥보드를 운전하여 보도로 통행한 것이 이 사건 사고의 직접적 원인이라고 보기 어려운 점, (c) 원고가 순간적인 집중력 저하 또는 판단착오로 전동킥보드를 운전하여 횡단보도를 횡단하였을 가능성도 있는 점, (d) 원고의 위와 같은 전동킥보드 운전행위가 산재보험법의 보호대상에서 배제될 정도로 그 위법의 정도나 비난가능성이 크다고 보기는 어려운 점 등에 비추어 보면, 원고의 통행방법 위반행위가 산재보험법 제37조 제2항 본문에서 정한 '범죄행위'에 해당한다고 볼 수 없다. </p>
+                        <p style="text-indent: 1.5em;">⑤ 앞서 본 사정들을 고려할 때 원고의 신호위반, 통행방법위반행위를 산재보험법 제37조 제2항 본문에서 정한 고의·자해행위와 동등하거나 그에 준하여 평가하여야 할 정도로 요양급여 수급에 관하여 불법성이 있다거나, 근로자의 업무수행을 위한 운전 과정에서 통상 수반되는 위험의 범위를 벗어나 우연성이 결여된 정도에 이르렀다고 보기 어렵다.</p>
+                        
+                        <p class="font-semibold mt-4 mb-2">4. 결론</p>
+                        <p style="text-indent: 1.5em;">따라서 원고의 청구는 이유 있으므로 이를 인용하기로 하여 주문과 같이 판결한다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AA.html 콘텐츠 -->
+        <section id="expert-guide" class="expert-guide">
+            <div class="text-center mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold section-title mb-6">서론: 판결의 의미와 전문가의 역할</h2>
+                <p class="text-slate-700 max-w-4xl mx-auto leading-relaxed">최근 전동킥보드 퇴근길 사고에 대한 법원의 산재 인정 판결은 근로자의 출퇴근 재해 범위 해석에 중요한 시사점을 제공합니다. 이 판결은 단순히 특정 사고 유형에 국한되지 않고, 근로자의 과실 여부를 넘어선 산재 보호의 확대 가능성을 보여주었습니다.</p>
+            </div>
+
+            <div class="mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold section-title text-center mb-10">핵심 가이드라인: 판결에서 도출된 원칙</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">1. '범죄행위'의 엄격한 해석</h3>
+                        <p class="text-slate-600">모든 교통법규 위반을 산재보험법상 '범죄행위'로 보지 않도록 주장해야 합니다. 보험 제도의 목적과 취지에 비추어, 제도의 근간을 흔들 만큼 중대하고 고의적인 위법성 여부를 집중적으로 다뤄야 합니다.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">2. 근로자의 상황 및 과실 정도 심층 분석</h3>
+                        <p class="text-slate-600">사고 당시 근로자의 피로도, 정신적 상태, 과거 법규 위반 이력 등 사고 발생에 영향을 미쳤을 수 있는 비고의적 요인을 적극적으로 입증해야 합니다. 순간적인 판단 착오 가능성에 초점을 맞춥니다.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">3. 사회적·제도적 배경의 고려</h3>
+                        <p class="text-slate-600">개인형 이동장치(PM) 관련 법규 및 인식이 미성숙했던 시점의 사고인 경우, 근로자의 법규 위반이 비난 가능성이 크지 않음을 강조해야 합니다. 제도적 미비점이 근로자에게 전가되지 않도록 논리 개발이 필요합니다.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">4. '통상 수반되는 위험'의 폭넓은 해석</h3>
+                        <p class="text-slate-600">출퇴근 재해는 통상적인 경로와 방법으로 출퇴근 중 발생한 사고를 포괄합니다. 근로자의 행위가 '업무수행을 위한 운전 과정에서 통상 수반되는 위험의 범위'를 벗어났는지 여부를 엄격하게 판단해야 함을 주장해야 합니다.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">5. 입증 책임의 원칙 활용</h3>
+                        <p class="text-slate-600">근로복지공단이 요양급여 지급을 거부할 경우, '근로자의 범죄행위로 인한 재해'라는 예외 사유를 공단이 충분히 증명해야 함을 명확히 요구해야 합니다. 입증 부족 시 근로자에게 유리한 판단을 이끌어낼 수 있습니다.</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-bold text-xl text-blue-700 mb-3">6. 산재보험 본연의 취지 강조</h3>
+                        <p class="text-slate-600">산재보험은 근로자 보호를 위한 사회보험임을 지속적으로 강조해야 합니다. 사소한 과실에 대한 과도한 책임 전가는 제도의 본질적 취지에 반한다는 점을 주장해야 합니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-16">
+                <h2 class="text-2xl md:text-3xl font-bold section-title text-center mb-10">실무 체크리스트: 사건 검토 시 고려사항</h2>
+                <div class="max-w-xl mx-auto space-y-4">
+                    <div class="flow-box">사고 발생 경위 및 시간, 장소는? (출퇴근 경로 여부 확인)</div>
+                    <div class="flow-arrow"><span>⬇️</span></div>
+                    <div class="flow-box">근로자의 해당 법규 위반 행위의 고의성/중대성 여부 (블랙박스, 진술 등)</div>
+                    <div class="flow-arrow"><span>⬇️</span></div>
+                    <div class="flow-box">사고 당시 근로자의 신체적/정신적 상태 (근무 시간, 질병, 피로도 등)</div>
+                    <div class="flow-arrow"><span>⬇️</span></div>
+                    <div class="flow-box">해당 법규(예: 개인형이동장치 관련 법)의 사회적 인식 및 제도적 정착 여부</div>
+                    <div class="flow-arrow"><span>⬇️</span></div>
+                    <div class="flow-box">공단의 불승인 근거가 '범죄행위'임을 명확히 주장하는지? (입증 책임 확인)</div>
+                    <div class="flow-arrow"><span>⬇️</span></div>
+                    <div class="flow-box bg-indigo-700 text-white font-bold">✨ 종합 판단 및 이의 제기/소송 준비 ✨</div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <h2 class="text-2xl md:text-3xl font-bold section-title mb-6">마무리: 근로자 보호의 최전선에서</h2>
+                <p class="text-slate-700 max-w-4xl mx-auto leading-relaxed">이번 판결은 법원이 근로자의 실수를 무조건적으로 비난하기보다, 산재보험 제도의 큰 틀 안에서 근로자 보호라는 대원칙을 우선시했음을 보여줍니다.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-8 mt-8 text-sm text-slate-500 bg-slate-100">
+        <p>© 2025 김준영 변호사 · 노무사. All rights reserved.</p>
+        <p class="mt-1">본 콘텐츠는 서울행정법원_2024구단75935 판결문을 기반으로 제작되었습니다.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dispute Doughnut Chart
+            const disputeCtx = document.getElementById('disputeChart');
+            if (disputeCtx) {
+                new Chart(disputeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['공단 주장 (산재 아님)', 'A씨 주장 (산재 맞음)'],
+                        datasets: [{
+                            data: [50, 50],
+                            backgroundColor: ['#ef4444', '#22c55e'],
+                            borderColor: '#f8fafc',
+                            borderWidth: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Judgment Card Click Event
+            document.querySelectorAll('.judgment-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const content = card.querySelector('.judgment-content');
+                    content.classList.toggle('show');
+                });
+            });
+
+            // --- 스크롤 네비게이션 기능으로 수정 ---
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            // 1. 탭 클릭 시 부드럽게 스크롤
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        // 헤더 높이를 고려하여 스크롤 위치 조정
+                        const headerOffset = 80; // 헤더 높이(px) + 약간의 여백
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+
+            // 2. 스크롤 위치에 따라 활성 탭 변경
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { 
+                rootMargin: "-40% 0px -60% 0px", // 화면의 중앙 부분을 기준으로 활성화
+                threshold: 0
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
